@@ -298,6 +298,18 @@ function onLoad(saved_data)
             place(v,cursorLocation + Vector(0,2,0),droppingPlayerColor)
         end)
     end
+    addHotkey("Add fear", function (droppingPlayerColor, hoveredObject, cursorLocation, key_down_up)
+        if not gameStarted or gamePaused then
+            return
+        end
+        aidBoard.call("addFear")
+    end)
+    addHotkey("Remove fear", function (droppingPlayerColor, hoveredObject, cursorLocation, key_down_up)
+        if not gameStarted or gamePaused then
+            return
+        end
+        aidBoard.call("removeFear")
+    end)
 
     for _,v in ipairs(interactableObjectsToDisableOnLoad) do
         if getObjectFromGUID(v) ~= nil then
