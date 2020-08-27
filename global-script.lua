@@ -266,6 +266,7 @@ function onSave()
         panelTurnOrderVisibility = UI.getAttribute("panelTurnOrder","visibility"),
         panelTimePassesVisibility = UI.getAttribute("panelTimePasses","visibility"),
         panelReadyVisibility = UI.getAttribute("panelReady","visibility"),
+        panelFearVisibility = UI.getAttribute("panelFear", "visibility"),
     }
     if blightedIslandCard ~= nil then
         data_table.blightedIslandGuid = blightedIslandCard.guid
@@ -380,6 +381,7 @@ function onLoad(saved_data)
             UI.setAttribute("panelTurnOrder","visibility",loaded_data.panelTurnOrderVisibility)
             UI.setAttribute("panelTimePasses","visibility",loaded_data.panelTimePassesVisibility)
             UI.setAttribute("panelReady","visibility",loaded_data.panelReadyVisibility)
+            UI.setAttribute("panelFear","visibility",loaded_data.panelFear)
             UI.setAttribute("panelUIToggle","active","true")
 
             SetupPowerDecks()
@@ -2258,8 +2260,7 @@ function setupFearTokens()
         end
     end
     fearPool = fearMulti * numPlayers
-    aidBoard.editButton({index = 1, label = tostring(fearPool)})
-    aidBoard.editButton({index = 2, label = 0})
+    aidBoard.call("updateFearUI", {fearPool = fearPool, generatedFear = generatedFear})
 end
 ----- Minor/Major Power Section
 function SetupPowerDecks()
@@ -4187,6 +4188,10 @@ end
 function toggleReadyUI(player)
     colorEnabled = getCurrentState("panelReady", player.color)
     toggleUI("panelReady", player.color, colorEnabled)
+end
+function toggleFearUI(player)
+    colorEnabled = getCurrentState("panelFear", player.color)
+    toggleUI("panelFear", player.color, colorEnabled)
 end
 function getCurrentState(xmlID, player_color)
     local colorEnabled = false
