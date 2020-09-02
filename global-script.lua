@@ -3312,6 +3312,8 @@ function resetPiece(object, rotation, depth)
     return object
 end
 ------
+scaleOrigin = Vector(5.96, 1.08, 16.59)
+scaleFactor = {position = 1.09, size = 1.1}
 posMap = { -- This order should exactly match alternateSetupNames table
     { -- 1 player
         { -- Standard
@@ -3744,7 +3746,8 @@ function BoardCallback(obj,pos,rot)
     obj.interactable = false
     obj.setLock(true)
     obj.setRotationSmooth(rot, false, true)
-    obj.setPositionSmooth(pos, false, true)
+    obj.setPositionSmooth((pos-scaleOrigin)*scaleFactor.position+scaleOrigin, false, true)
+    obj.scale(scaleFactor.size)
     Wait.condition(function() setupMap(obj) end, function() return obj.resting and not obj.loading_custom end)
 end
 setupMapCoObj = nil
