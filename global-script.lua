@@ -266,6 +266,7 @@ function onSave()
         panelTurnOrderVisibility = UI.getAttribute("panelTurnOrder","visibility"),
         panelTimePassesVisibility = UI.getAttribute("panelTimePasses","visibility"),
         panelReadyVisibility = UI.getAttribute("panelReady","visibility"),
+        toggleTimePasses = UI.getAttribute("toggleTimePasses", "isOn")
     }
     if blightedIslandCard ~= nil then
         data_table.blightedIslandGuid = blightedIslandCard.guid
@@ -357,6 +358,8 @@ function onLoad(saved_data)
             UI.setAttribute("panelTurnOrder","visibility",loaded_data.panelTurnOrderVisibility)
             UI.setAttribute("panelTimePasses","visibility",loaded_data.panelTimePassesVisibility)
             UI.setAttribute("panelReady","visibility",loaded_data.panelReadyVisibility)
+            -- Note that "isOn"` returns a string.
+            UI.setAttribute("toggleTimePasses", "isOn", loaded_data.toggleTimePasses == "True")
             UI.setAttribute("panelUIToggle","active","true")
 
             SetupPowerDecks()
@@ -3222,14 +3225,15 @@ function timePasses()
     end
 end
 function timePassesCo()
+    local extraTimePasses = UI.getAttribute("toggleTimePasses", "isOn") == "True"
     for _,object in pairs(upCast(seaTile,1.1,0,0.9)) do
-        handlePiece(object, 1)
+        handlePiece(object, 1, extraTimePasses)
     end
 
     for _,guid in pairs (elementScanZones) do
         local zone = getObjectFromGUID(guid)
         for _, obj in ipairs(zone.getObjects()) do
-            handlePiece(obj, 1)
+            handlePiece(obj, 1, extraTimePasses)
         end
     end
     broadcastToAll("Time Passes...", Color.SoftBlue)
@@ -3242,7 +3246,7 @@ function timePassesCo()
     timePassing = false
     return 1
 end
-function handlePiece(object, depth)
+function handlePiece(object, depth, extraTimePasses)
     local isoOffset = Vector(-11.2, 2, -1)
     local defOffset = Vector(-9.5, 2, -1)
     local name = object.getName()
@@ -3250,22 +3254,22 @@ function handlePiece(object, depth)
     local count = 3
     local spos = getObjectFromGUID(elementScanZones[color]).getPosition()
     if string.sub(name,1,4) == "City" then
-        object = resetPiece(object, Vector(0,180,0), depth)
+        object = resetPiece(object, Vector(0,180,0), depth, extraTimePasses)
     elseif string.sub(name,1,4) == "Town" then
-        object = resetPiece(object, Vector(0,180,0), depth)
+        object = resetPiece(object, Vector(0,180,0), depth, extraTimePasses)
     elseif string.sub(name,1,8) == "Explorer" then
-        object = resetPiece(object, Vector(0,180,0), depth)
+        object = resetPiece(object, Vector(0,180,0), depth, extraTimePasses)
     elseif string.sub(name,1,5) == "Dahan" then
-        object = resetPiece(object, Vector(0,0,0), depth)
+        object = resetPiece(object, Vector(0,0,0), depth, extraTimePasses)
     elseif string.sub(name,1,6) == "Blight" then
-        object = resetPiece(object, Vector(0,180,0), depth)
+        object = resetPiece(object, Vector(0,180,0), depth, extraTimePasses)
     elseif string.sub(name,-7) == "Defence" then
         if object.getLock() == false then
             object.destruct()
             object = nil
         end
     elseif string.sub(name,-23) == "Isolate Reminder Tokens" then
-        if object.getLock() == false then
+        if object.getLock() == false and extraTimePasses then
              count, _ = string.find(name, "'")
              count = count - 1
              color = string.sub(name,1,count)
@@ -3273,7 +3277,7 @@ function handlePiece(object, depth)
              object.setPositionSmooth(Vector(spos.x,0,spos.z) + isoOffset)
         end
     elseif string.sub(name,-23) == "Defence Reminder Tokens" then
-        if object.getLock() == false then
+        if object.getLock() == false and extraTimePasses then
              count, _ = string.find(name, "'")
              count = count - 1
              color = string.sub(name,1,count)
@@ -3284,12 +3288,12 @@ function handlePiece(object, depth)
         if object.getStateId() ~= 9 then
             object = object.setState(9)
         end
-        if object.getLock() == false then
+        if object.getLock() == false and extraTimePasses then
              object.destruct()
              object = nil
         end
     elseif object.tag == "Tile" then
-        if object.getVar("elements") ~= nil then
+        if object.getVar("elements") ~= nil and extraTimePasses then
             if object.getLock() == false then
                  object.destruct()
                  object = nil
@@ -3298,11 +3302,11 @@ function handlePiece(object, depth)
     end
     return object
 end
-function resetPiece(object, rotation, depth)
+function resetPiece(object, rotation, depth, extraTimePasses)
     for _,obj in pairs(upCastRay(object,5)) do
         -- need to store tag since after state change tag isn’t instantly updated
         local isFigurine = obj.tag == "Figurine"
-        obj = handlePiece(obj, depth + 1)
+        obj = handlePiece(obj, depth + 1, extraTimePasses)
         if obj ~= nil then
             obj.setPositionSmooth(obj.getPosition() + Vector(0,2*depth,0))
         end
@@ -4216,6 +4220,10 @@ function getCurrentState(xmlID, player_color)
         end
     end
     return colorEnabled
+end
+function updateToggle(player, value, id)
+    -- https://old.reddit.com/r/tabletopsimulator/comments/ge3iar/ui_scripting_toggles_not_updating_attributes_when/fpovout/
+    UI.setAttribute(id, "isOn", value)
 end
 
 function toggleUI(xmlID, player_color, colorEnabled)
