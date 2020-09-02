@@ -192,12 +192,13 @@
     <Text id="panelReadyYes" visibility="Invisible" fontsize="36" color="#00FF00">Ready</Text>
     <Text id="panelReadyNo" visibility="Invisible" fontsize="36" color="#FF0000">Not Ready</Text>
 </Panel>
-<Panel id="panelUI" visibility="Invisible" width="160" height="100" rectAlignment="UpperRight" offsetXY="-240 0">
+<Panel id="panelUI" visibility="Invisible" width="160" height="120" rectAlignment="UpperRight" offsetXY="-240 0">
     <VerticalLayout>
         <Button onClick="toggleInvaderUI" textAlignment="MiddleCenter">Toggle Invader UI</Button>
         <Button id="panelUIAdversary" active="false" onClick="toggleAdversaryUI" textAlignment="MiddleCenter">Toggle Adversary UI</Button>
         <Button onClick="toggleTurnOrderUI" textAlignment="MiddleCenter">Toggle Turn Order UI</Button>
         <Button onClick="toggleTimePassesUI" textAlignment="MiddleCenter">Toggle Time Passes UI</Button>
         <Button onClick="toggleReadyUI" textAlignment="MiddleCenter">Toggle Ready UI</Button>
+        <Toggle onValueChanged="updateToggle" id="toggleTimePasses">Enable more timepasses cleanup</Toggle>
     </VerticalLayout>
 </Panel>
